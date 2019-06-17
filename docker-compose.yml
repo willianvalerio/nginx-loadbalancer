@@ -1,19 +1,19 @@
 version: "3.7"
 services:
   vivo:
-    image: registry.gitlab.com/tecninjas/ginger/gitlabxaws:5c4fbc96
+    image: registry.gitlab.com/tecninjas/ginger/gitlabxaws
     ports: 
       - 82:8080
     networks:
       - rede
   diveo:
-    image: registry.gitlab.com/tecninjas/ginger/gitlabxaws:5c4fbc96
+    image: registry.gitlab.com/tecninjas/ginger/gitlabxaws
     ports: 
       - 83:8080
     networks:
       - rede
   aws:
-    image: registry.gitlab.com/tecninjas/ginger/gitlabxaws:5c4fbc96
+    image: registry.gitlab.com/tecninjas/ginger/gitlabxaws
     ports: 
       - 81:8080
     networks:
