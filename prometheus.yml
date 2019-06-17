@@ -1,0 +1,14 @@
+
+global:
+  scrape_interval:     10s
+  evaluation_interval: 10s
+scrape_configs:
+  - job_name: 'nginx'
+    scrape_interval: 10s
+    metrics_path: "/prometheus"
+    static_configs:
+      - targets: ['diveo:8080','vivo:8080','aws:8080']
+  - job_name: 'prom'
+    scrape_interval: 10s
+    static_configs:
+      - targets: ['prometheus:9090']

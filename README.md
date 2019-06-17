@@ -1,2 +1,2 @@
 # nginx-loadbalancer
-A simple NNGINX as HTTP Load Balancer
+A simple NGINX as HTTP Load Balancer
