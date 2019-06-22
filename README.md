@@ -23,9 +23,9 @@ docker-compose up -d
 
 Prometheus: 9090 \
 Grafana: 3000 \
-Nginx Load Balancer: 80 \
+Nginx Load Balancer: 80
 
 ### Grafana login
 
 user: admin \
-password: nginxlb \
+password: nginxlb
