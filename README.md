@@ -21,11 +21,11 @@ docker-compose up -d
 
 ### Expose ports
 
-Prometheus: 9090
-Grafana: 3000
-Nginx Load Balancer: 80
+Prometheus: 9090 \
+Grafana: 3000 \
+Nginx Load Balancer: 80 \
 
 ### Grafana login
 
-user: admin
-password: nginxlb
+user: admin \
+password: nginxlb \
