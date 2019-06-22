@@ -27,7 +27,7 @@ services:
     networks:
       - rede
   prometheus:
-    image: linuxtips/prometheus_alpine
+    image: prom/prometheus
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/var/lib/prometheus
@@ -38,7 +38,10 @@ services:
   grafana:
     image: grafana/grafana
     volumes:
-      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning
+      - ./grafana/dashboards:/var/lib/grafana/dashboards
+    env_file:
+      - grafana/grafana.ini
     depends_on:
       - prometheus
     networks:
@@ -50,4 +53,3 @@ networks:
   rede:
 volumes:
   prometheus_data:
-  grafana_data:
