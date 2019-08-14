@@ -121,6 +121,7 @@ pipeline {
                     }catch(Exception e){
                         env["ROLLBACK"] = true
                         echo "CAIU NA EXCECAO"
+                        echo "ROLLBACK: ${ROLLBACK}"
                     }
                 }
             }
