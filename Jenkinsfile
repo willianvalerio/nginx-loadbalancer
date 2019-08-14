@@ -126,7 +126,7 @@ pipeline {
                                     //     currentBuild.result = 'FAILURE'
                                     // }
                                     //try{
-                                    //    echo "Testes DEV"
+                                        echo "Testes DEV"
                                         sh('exit 1')
                                     //}catch(Exception e){
                                         env["ROLLBACK"]=true
@@ -245,6 +245,7 @@ pipeline {
             echo "always"
         }
     }
+
 }
 
 
