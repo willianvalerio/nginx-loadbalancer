@@ -105,11 +105,11 @@ pipeline {
                     stages{
                         stage('deploy: dev') {
                             when {
-                                    environment name: 'RUN_DEPLOY_DEV', value: 'true'
-                                }       
-                                steps {
-                                        echo "Iniciando deploy no ambiente de DEV"
-                                }
+                                environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                            }       
+                            steps {
+                                echo "Iniciando deploy no ambiente de DEV"
+                            }
                         }
                             
                         stage('tests: dev'){
@@ -137,14 +137,14 @@ pipeline {
                         }
 
                         stage('pull-request'){
-                                when {
-                                    environment name: 'RUN_DEPLOY_DEV', value: 'true'
-                                    environment name: 'ROLLBACK', value: 'false'
-                                }              
-                                steps{
-                                    echo "Creating pull request to ble"
-                                    createPullRequest('master')
-                                }
+                            when {
+                                environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                                environment name: 'ROLLBACK', value: 'false'
+                            }              
+                            steps{
+                                echo "Creating pull request to ble"
+                                //createPullRequest('master')
+                            }
                         }
                     }                            
                 }
@@ -191,7 +191,7 @@ pipeline {
                             }
                         }
 
-                            stage('merge-back') {
+                        stage('merge-back') {
                             when {
                                 environment name: 'RUN_DEPLOY_PRD', value: 'true'
                             }            
@@ -223,7 +223,7 @@ pipeline {
             // }
             steps{
                 script{
-                    if (currentBuild.result != 'SUCCESS'){
+                    if (currentBuild.result != 'SUCCESS') {
                         echo "Efetuando rollback por falhas no teste"
                     }
                     
@@ -240,10 +240,9 @@ pipeline {
         failure {
             //notifyBuild('FAILED')
             echo "failure"
-            // TO-DO delete cloud formation from S3
         }
         always {
-            deleteDir() // Must delete after build, random errors occurs reusing workspace
+            echo "always"
         }
     }
 }
