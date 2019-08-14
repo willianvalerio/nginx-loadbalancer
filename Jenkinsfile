@@ -123,6 +123,7 @@ pipeline {
                                         sh "exit 0"
                                     }
                                     if(currentBuild.result != 'SUCCESS'){
+                                        echo "build not success"
                                         env["ROLLBACK"]=true
                                     }
                                 }
