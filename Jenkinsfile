@@ -38,6 +38,7 @@ pipeline {
                 stage('check-commit-message') {
                     steps {
                         script {
+                            env["RUN_DEPLOY_DEV"]=true
                             current_commit_message = sh(script: '''
                                 git rev-list --format=%B --max-count=1 HEAD |head -2 |tail -1
                             ''', returnStdout: true).trim()
