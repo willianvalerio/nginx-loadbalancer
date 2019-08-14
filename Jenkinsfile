@@ -5,11 +5,6 @@ import net.sf.json.JSONObject;
 
 pipeline {
     agent any
-    tools {
-        maven 'M2'
-        //jdk 'Jdk1.7u80'
-        jdk 'Jdk1.8u191'
-    }
     environment {
 
         // For teste purpose only (need to be set always to TRUE! )
