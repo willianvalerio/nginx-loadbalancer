@@ -56,38 +56,6 @@ pipeline {
                     }
                 }
 
-                stage('set-envs') {
-                    steps {
-                        script {
-                            if (BRANCH_NAME.equals("master")) {
-                                echo "***** PERFORMING STEPS ON MASTER *****"
-                                env['environment'] = "prd"
-                                env['RUN_DEPLOY_PRD'] = true
-                                updateVersion(true)
-                            } else if (BRANCH_NAME.startsWith("PR")) {
-                                echo "***** PERFORMING STEPS ON PR *****"
-                                env['environment'] = "hml"
-                                env['RUN_DEPLOY_HML'] = true
-                                version_code_tag()
-                                env['newVersion'] = env['bumpci_tag']
-                            } else if (BRANCH_NAME.startsWith("hotfix")) {
-                                echo "***** PERFORMING STEPS ON PR *****"
-                                env['environment'] = "hml"
-                                env['RUN_DEPLOY_HML'] = true
-                                version_code_tag()
-                                env['newVersion'] = env['bumpci_tag']
-                            }
-                            else {
-                                echo "***** PERFORMING STEPS ON ANY BRANCH *****"
-                                env['environment'] = "dev"
-                                env['RUN_DEPLOY_DEV'] = true
-                                updateVersion(false)
-                            }
-                        }
-
-                        echo "***** FINISHED PRE-BUILD STEP *****"
-                    }
-                } 
             }
 
         }
@@ -104,8 +72,9 @@ pipeline {
                 stage('compile') {
                     steps {
                         script{
-                            sh 'npm install --save'
-                            sh 'zip -r p2pIssuerTransfer.zip .'
+                            echo "build"
+                            //sh 'npm install --save'
+                            //sh 'zip -r p2pIssuerTransfer.zip .'
                         }
                     }
                 } 
@@ -115,8 +84,9 @@ pipeline {
         stage('package-sam') {
             steps {
                 script{
-                    sh 'aws cloudformation package --template-file cloudformation/template/cloudformation.yml --s3-bucket ${S3_BUCKET_ARTIFACT}  --output-template-file cloudformation/output/cloudformation.yml'
-                    env['fileOutput'] = 'cloudformation.yml'
+                    //sh 'aws cloudformation package --template-file cloudformation/template/cloudformation.yml --s3-bucket ${S3_BUCKET_ARTIFACT}  --output-template-file cloudformation/output/cloudformation.yml'
+                    //env['fileOutput'] = 'cloudformation.yml'
+                    echo "package"
                 }
             }
         }
@@ -124,10 +94,7 @@ pipeline {
         stage('upload-iaac-to-s3') {
             steps {
                 script{
-                    echo "upload template to s3://${env.S3_BUCKET_TEMPLATE}/p2pIssuerTransfer/${newVersion}/templates/"
-                    sh "aws s3 cp cloudformation/output/cloudformation.yml s3://${S3_BUCKET_TEMPLATE}/p2pIssuerTransfer/${newVersion}/templates/"
-                    echo "upload parameter files to s3://${env.S3_BUCKET_TEMPLATE}/p2pIssuerTransfer/${newVersion}/parameters/"
-                    sh "aws s3 sync cloudformation/parameters/ s3://${env.S3_BUCKET_TEMPLATE}/p2pIssuerTransfer/${newVersion}/parameters/"
+                    echo "upload"
                 }
             }
         }
