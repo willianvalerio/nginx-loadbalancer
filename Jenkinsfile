@@ -99,7 +99,7 @@ pipeline {
             }
         }
 
-        stage(""){
+        stage(''){
             parallel{
                 stage("dev"){
                     stages{
@@ -218,13 +218,15 @@ pipeline {
         }
 
         stage('rollback'){
-            when{
-                environment name: 'ROLLBACK', value: 'true'
-            }
+            // when{
+            //     environment name: 'ROLLBACK', value: 'true'
+            // }
             steps{
                 script{
-                    echo "Efetuando rollback por falhas no teste"
-                    currentBuild.result = 'FAILURE'
+                    if (currentBuild.result != 'SUCCESS'){
+                        echo "Efetuando rollback por falhas no teste"
+                    }
+                    
                 }
             }
         }
