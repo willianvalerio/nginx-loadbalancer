@@ -99,7 +99,7 @@ pipeline {
             }
         }
 
-        stage(''){
+        stage('deployment'){
             parallel{
                 stage("dev"){
                     stages{
@@ -122,7 +122,7 @@ pipeline {
                                         echo "Testes DEV"
                                         sh "exit 0"
                                     }
-                                    if(currentBuild.result != 'SUCESS'){
+                                    if(currentBuild.result != 'SUCCESS'){
                                         env["ROLLBACK"]=true
                                     }
                                 }
