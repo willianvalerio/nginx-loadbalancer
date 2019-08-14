@@ -99,7 +99,7 @@ pipeline {
             }
         }
 
-        stage("deploy environment"){
+        stage(""){
             parallel{
                 stage("dev"){
                     stages{
@@ -118,13 +118,19 @@ pipeline {
                             }    
                             steps{
                                 script{
-                                    try{
+                                    if((returnStdout: true, script: 'proposital error')){
                                         echo "Testes DEV"
-                                        sh(returnStdout: true, script: 'proposital error')
-                                    }catch(Exception e){
+                                    }else{
                                         env["ROLLBACK"]=true
                                         currentBuild.result = 'FAILURE'
                                     }
+                                    // try{
+                                    //     echo "Testes DEV"
+                                    //     sh(returnStdout: true, script: 'proposital error')
+                                    // }catch(Exception e){
+                                    //     env["ROLLBACK"]=true
+                                    //     currentBuild.result = 'FAILURE'
+                                    // }
                                 }
                             }
                         }
