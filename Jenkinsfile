@@ -111,22 +111,23 @@ pipeline {
                                         echo "Iniciando deploy no ambiente de DEV"
                                 }
                         }
-                        try{
-                            stage('tests: dev'){
-                                when {
-                                    environment name: 'RUN_DEPLOY_DEV', value: 'true'
-                                }    
-                                steps{
-                                    script{
+                            
+                        stage('tests: dev'){
+                            when {
+                                environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                            }    
+                            steps{
+                                script{
+                                    try{
                                         echo "Testes DEV"
-                                        echo sh(returnStdout: true, script: 'proposital error')
+                                        sh(returnStdout: true, script: 'proposital error')
+                                    }catch(Exception e){
+                                        env["ROLLBACK"]=true
+                                        currentBuild.result = 'FAILURE'
                                     }
                                 }
                             }
-                        }catch(e){
-                            env['ROLLBACK']=true
                         }
-
 
                         stage('pull-request'){
                                 when {
