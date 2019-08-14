@@ -125,12 +125,12 @@ pipeline {
                                     //     env["ROLLBACK"]=true
                                     //     currentBuild.result = 'FAILURE'
                                     // }
-                                    try{
-                                        echo "Testes DEV"
+                                    //try{
+                                    //    echo "Testes DEV"
                                         sh('exit 1')
-                                    }catch(Exception e){
+                                    //}catch(Exception e){
                                         env["ROLLBACK"]=true
-                                        currentBuild.result = 'FAILURE'
+                                    //    currentBuild.result = 'FAILURE'
                                     }
                                 }
                             }
