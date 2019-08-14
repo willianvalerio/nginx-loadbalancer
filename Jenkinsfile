@@ -123,8 +123,7 @@ pipeline {
                                         echo sh(returnStdout: true, script: 'proposital error')
                                     }catch(Exception e){
                                         env["ROLLBACK"]=true
-                                        echo "CAIU NA EXCECAO"
-                                        echo "ROLLBACK: ${ROLLBACK}"
+                                        unsuccessful('Tests failed')
                                     }
                                 }
                             }
