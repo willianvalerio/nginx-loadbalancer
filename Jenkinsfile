@@ -118,19 +118,20 @@ pipeline {
                             }    
                             steps{
                                 script{
-                                    if(false){
-                                        echo "Testes DEV"
-                                    }else{
-                                        env["ROLLBACK"]=true
-                                        currentBuild.result = 'FAILURE'
-                                    }
-                                    // try{
+                                    // echo "Testes DEV"
+                                    // if(false){
                                     //     echo "Testes DEV"
-                                    //     sh(returnStdout: true, script: 'proposital error')
-                                    // }catch(Exception e){
+                                    // }else{
                                     //     env["ROLLBACK"]=true
                                     //     currentBuild.result = 'FAILURE'
                                     // }
+                                    try{
+                                        echo "Testes DEV"
+                                        sh('exit 1')
+                                    }catch(Exception e){
+                                        env["ROLLBACK"]=true
+                                        currentBuild.result = 'FAILURE'
+                                    }
                                 }
                             }
                         }
