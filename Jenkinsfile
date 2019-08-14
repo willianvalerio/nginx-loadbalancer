@@ -131,7 +131,7 @@ pipeline {
                                     //}catch(Exception e){
                                         env["ROLLBACK"]=true
                                     //    currentBuild.result = 'FAILURE'
-                                    }
+                                    //}
                                 }
                             }
                         }
