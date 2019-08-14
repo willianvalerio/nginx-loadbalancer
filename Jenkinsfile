@@ -120,7 +120,7 @@ pipeline {
                                 script{
                                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
                                         echo "Testes DEV"
-                                        sh "exit 1"
+                                        sh "exit 0"
                                     }
                                     if(currentBuild.result != 'SUCESS'){
                                         env["ROLLBACK"]=true
@@ -216,10 +216,6 @@ pipeline {
             }
             steps{
                 script{
-                    // if (currentBuild.result != 'SUCCESS') {
-                    //     echo "Efetuando rollback por falhas no teste"
-                    // }
-
                     echo "Efetuando rollback por falhas no teste"
                     currentBuild.result = 'UNSTABLE'
                     
