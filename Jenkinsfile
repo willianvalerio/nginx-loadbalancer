@@ -118,20 +118,13 @@ pipeline {
                             }    
                             steps{
                                 script{
-                                    // echo "Testes DEV"
-                                    // if(false){
-                                    //     echo "Testes DEV"
-                                    // }else{
-                                    //     env["ROLLBACK"]=true
-                                    //     currentBuild.result = 'FAILURE'
-                                    // }
-                                    //try{
+                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
                                         echo "Testes DEV"
-                                        //sh('exit 1')
-                                    //}catch(Exception e){
+                                        sh "exit 1"
+                                    }
+                                    if(currentBuild.result != 'SUCESS'){
                                         env["ROLLBACK"]=true
-                                        currentStage.result = 'FAILURE'
-                                    //}
+                                    }
                                 }
                             }
                         }
