@@ -122,7 +122,7 @@ pipeline {
                                         echo "Testes DEV"
                                         sh "exit 0"
                                     }
-                                    if(currentBuild.result != 'SUCCESS'){
+                                    if(currentBuild.result != 'SUCCESS' && currentBuild.result != null){
                                         echo currentBuild.result
                                         echo "build not success"
                                         env["ROLLBACK"]=true
