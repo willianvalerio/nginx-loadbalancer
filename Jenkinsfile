@@ -119,7 +119,7 @@ pipeline {
                         echo "Testes DEV"
                         echo sh(returnStdout: true, script: 'proposital error')
                     }catch(Exception e){
-                        env['ROLLBACK'] = true
+                        env["ROLLBACK"] = true
                         echo "CAIU NA EXCECAO"
                     }
                 }
@@ -128,14 +128,11 @@ pipeline {
 
         stage('pull-request'){
             when {
-                allOf{
-                    environment name: 'RUN_DEPLOY_DEV', value: 'true'
-                    environment name: 'ROLLBACK', value: 'false'
-                }
-
+                environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                environment name: 'ROLLBACK', value: 'false'
             }              
             steps{
-                echo "Creating pull request to ${newVersion}"
+                echo "Creating pull request to ble"
                 createPullRequest('master')
             }
         }
