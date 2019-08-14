@@ -99,7 +99,7 @@ pipeline {
             }
         }
 
-        stage{
+        stage("deploy environment"){
             parallel{
                 stage("dev"){
                     stages{
