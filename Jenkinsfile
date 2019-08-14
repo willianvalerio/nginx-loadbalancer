@@ -99,88 +99,107 @@ pipeline {
             }
         }
 
-        stage('deploy: dev') {
-            when {
-                environment name: 'RUN_DEPLOY_DEV', value: 'true'
-            }       
-            steps {
-                     echo "Iniciando deploy no ambiente de DEV"
-            }
-        }
+        stage{
+            parallel{
+                stages("dev"){
+                    stage('deploy: dev') {
+                                when {
+                                    environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                                }       
+                                steps {
+                                        echo "Iniciando deploy no ambiente de DEV"
+                                }
+                            }
 
-        stage('tests: dev'){
-            when {
-                environment name: 'RUN_DEPLOY_DEV', value: 'true'
-            }    
-            steps{
-                script{
-                    try{
-                        echo "Testes DEV"
-                        echo sh(returnStdout: true, script: 'proposital error')
-                    }catch(Exception e){
-                        env["ROLLBACK"]=true
-                        echo "CAIU NA EXCECAO"
-                        echo "ROLLBACK: ${ROLLBACK}"
+                            stage('tests: dev'){
+                                when {
+                                    environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                                }    
+                                steps{
+                                    script{
+                                        try{
+                                            echo "Testes DEV"
+                                            echo sh(returnStdout: true, script: 'proposital error')
+                                        }catch(Exception e){
+                                            env["ROLLBACK"]=true
+                                            echo "CAIU NA EXCECAO"
+                                            echo "ROLLBACK: ${ROLLBACK}"
+                                        }
+                                    }
+                                }
+                            }
+
+                            stage('pull-request'){
+                                when {
+                                    environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                                    environment name: 'ROLLBACK', value: 'false'
+                                }              
+                                steps{
+                                    echo "Creating pull request to ble"
+                                    createPullRequest('master')
+                                }
+                            }
+                }
+                stages("hml"){
+                    stage('deploy: hml'){
+                        when {
+                            environment name: 'RUN_DEPLOY_HML', value: 'true'
+                        }            
+                        steps{
+                            script{
+                                echo "Deploy HML"
+                            }
+                        }
+                    }
+
+                    stage('tests: hml'){
+                        when {
+                            environment name: 'RUN_DEPLOY_HML', value: 'true'
+                        }            
+                        steps{
+                            script{
+                                try{
+                                    echo "Testes HML"
+                                }catch(Exception e){
+                                    env['ROLLBACK'] = true
+                                }
+                            }
+                        }
                     }
                 }
-            }
-        }
-
-        stage('pull-request'){
-            when {
-                environment name: 'RUN_DEPLOY_DEV', value: 'true'
-                environment name: 'ROLLBACK', value: 'false'
-            }              
-            steps{
-                echo "Creating pull request to ble"
-                createPullRequest('master')
-            }
-        }
-
-        stage('deploy: hml'){
-            when {
-                environment name: 'RUN_DEPLOY_HML', value: 'true'
-            }            
-            steps{
-                script{
-                    echo "Deploy HML"
-                }
-            }
-        }
-
-        stage('tests: hml'){
-            when {
-                environment name: 'RUN_DEPLOY_HML', value: 'true'
-            }            
-            steps{
-                script{
-                    try{
-                        echo "Testes HML"
-                    }catch(Exception e){
-                        env['ROLLBACK'] = true
+                stages("prd"){
+                    stage('deploy: prd'){
+                        when {
+                            environment name: 'RUN_DEPLOY_PRD', value: 'true'
+                        }            
+                        steps{
+                            script{
+                                echo "Deploy PRD"
+                            }
+                        }
                     }
-                }
-            }
-        }
 
-        // stage('approval-pr'){
-        //     when {
-        //         branch 'PR*'
-        //     }
-        //     steps{
-        //         script{
-        //             echo "Approval PR"
-        //         }
-        //     }
-        // }
+                        stage('merge-back') {
+                        when {
+                            environment name: 'RUN_DEPLOY_PRD', value: 'true'
+                        }            
+                        steps {
+                            script{
+                                merge_back()
+                            }
+                        }
+                    }
 
-        stage('deploy: prd'){
-            when {
-                environment name: 'RUN_DEPLOY_PRD', value: 'true'
-            }            
-            steps{
-                script{
-                    echo "Deploy PRD"
+                    stage('delete-branch'){
+                        when {
+                            environment name: 'RUN_DEPLOY_PRD', value: 'true'
+                        }            
+                        steps{
+                            script{
+                                echo "Delete Branch"
+                            }
+                        }
+                    }
                 }
             }
         }
@@ -197,27 +216,6 @@ pipeline {
             }
         }
 
-        stage('merge-back') {
-            when {
-                environment name: 'RUN_DEPLOY_PRD', value: 'true'
-            }            
-            steps {
-                script{
-                    merge_back()
-                }
-            }
-        }
-
-        stage('delete-branch'){
-            when {
-                environment name: 'RUN_DEPLOY_PRD', value: 'true'
-            }            
-            steps{
-                script{
-                    echo "Delete Branch"
-                }
-            }
-        }
     }
     post {
         success {
