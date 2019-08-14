@@ -123,7 +123,7 @@ pipeline {
                                         echo sh(returnStdout: true, script: 'proposital error')
                                     }catch(Exception e){
                                         env["ROLLBACK"]=true
-                                        unsuccessful('Tests failed')
+                                        currentBuild.result = 'UNSUCCESSFUL'
                                     }
                                 }
                             }
