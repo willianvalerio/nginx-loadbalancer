@@ -118,7 +118,7 @@ pipeline {
                             }    
                             steps{
                                 script{
-                                    if(sh(returnStdout: true, script: 'proposital error')){
+                                    if(false){
                                         echo "Testes DEV"
                                     }else{
                                         env["ROLLBACK"]=true
