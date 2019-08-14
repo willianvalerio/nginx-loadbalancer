@@ -211,14 +211,17 @@ pipeline {
         }
 
         stage('rollback'){
-            // when{
-            //     environment name: 'ROLLBACK', value: 'true'
-            // }
+            when{
+                 environment name: 'ROLLBACK', value: 'true'
+            }
             steps{
                 script{
-                    if (currentBuild.result != 'SUCCESS') {
-                        echo "Efetuando rollback por falhas no teste"
-                    }
+                    // if (currentBuild.result != 'SUCCESS') {
+                    //     echo "Efetuando rollback por falhas no teste"
+                    // }
+
+                    echo "Efetuando rollback por falhas no teste"
+                    currentBuild.result = 'UNSTABLE'
                     
                 }
             }
