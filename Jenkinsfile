@@ -12,7 +12,6 @@ pipeline {
         RUN_POST_BUILD = true
         RUN_COMPILE = true
         RUN_CI = true
-        ROLLBACK = false
         S3_BUCKET_ARTIFACT = "cdt-devops-tools-lambda-functions-artifacts"
         S3_BUCKET_TEMPLATE = "cdt-devops-tools-lambda-functions-template"
         //path = "splt_init"
