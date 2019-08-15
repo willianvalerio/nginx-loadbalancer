@@ -118,7 +118,7 @@ pipeline {
                             }    
                             steps{
                                 script{
-                                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
+                                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
                                         echo "Testes DEV"
                                         sh "exit 1"
                                     }
