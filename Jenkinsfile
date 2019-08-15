@@ -121,7 +121,7 @@ pipeline {
                                 script{
                                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
                                         echo "Testes DEV"
-                                        sh "exit 0"
+                                        sh "exit 1"
                                     }
                                     if(currentBuild.result != 'SUCCESS' && currentBuild.result != null){
                                         echo "Irei efetuar rollback"
