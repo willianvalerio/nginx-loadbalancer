@@ -120,11 +120,11 @@ pipeline {
                                 script{
                                     catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){
                                         echo "Testes DEV"
-                                        sh "exit 1"
+                                        sh "exit 0"
                                     }
+                                    echo "Current Build: ${currentBuild.result}"
                                     if(currentBuild.result != 'SUCCESS' && currentBuild.result == null){
-                                        echo "Irei efetuar rollback"
-                                        echo "Current Build: ${currentBuild.result}"
+                                        echo "Tests failed! I will rollback"
                                         env["ROLLBACK"]=true
                                     }
                                 }
@@ -140,8 +140,8 @@ pipeline {
                                 
                             }              
                             steps{
-                                echo "Creating pull request to ble"
-                                createPullRequest('master')
+                                echo "Creating pull request to master"
+                                //createPullRequest('master')
                             }
                         }
                     }                            
