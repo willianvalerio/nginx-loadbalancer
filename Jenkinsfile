@@ -122,8 +122,6 @@ pipeline {
                                         echo "Testes DEV"
                                         sh "exit 0"
                                     }
-                                    echo "Current Build: ${currentBuild.result}"
-                                    echo "Current stage: ${currentBuild.currentResult}"
                                     if(currentBuild.result == 'UNSTABLE'){
                                         echo "Tests failed! I will rollback"
                                         env["ROLLBACK"]=true
@@ -210,6 +208,13 @@ pipeline {
                                     echo "Delete Branch"
                                 }
                             }
+                        }
+                    }
+                }
+                stage("hotfix"){
+                    steps{
+                        script{
+                            echo "Create PR"
                         }
                     }
                 }
