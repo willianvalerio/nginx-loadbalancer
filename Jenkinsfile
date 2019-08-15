@@ -120,7 +120,7 @@ pipeline {
                                 script{
                                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
                                         echo "Testes DEV"
-                                        sh "exit 1"
+                                        sh "exit 0"
                                     }
                                     echo "Current Build: ${currentBuild.result}"
                                     echo "Current stage: ${currentBuild.currentResult}"
