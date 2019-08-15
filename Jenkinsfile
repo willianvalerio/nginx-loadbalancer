@@ -123,7 +123,7 @@ pipeline {
                                         echo "Testes DEV"
                                         sh "exit 1"
                                     }
-                                    if(currentBuild.result != 'SUCCESS' && currentBuild.result != null){
+                                    if(currentBuild.result != 'SUCCESS' && currentBuild.result == null){
                                         echo "Irei efetuar rollback"
                                         env["ROLLBACK"]=true
                                     }
