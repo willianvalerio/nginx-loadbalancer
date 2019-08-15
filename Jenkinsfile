@@ -14,7 +14,6 @@ pipeline {
         RUN_CI = true
         S3_BUCKET_ARTIFACT = "cdt-devops-tools-lambda-functions-artifacts"
         S3_BUCKET_TEMPLATE = "cdt-devops-tools-lambda-functions-template"
-        ROLLBACK = false
         //path = "splt_init"
         //newVersion = "${newVersion}"
 
@@ -125,6 +124,7 @@ pipeline {
                                     }
                                     if(currentBuild.result != 'SUCCESS' && currentBuild.result == null){
                                         echo "Irei efetuar rollback"
+                                        echo "Current Build: ${currentBuild.result}"
                                         env["ROLLBACK"]=true
                                     }
                                 }
@@ -134,7 +134,10 @@ pipeline {
                         stage('pull-request'){
                             when {
                                 environment name: 'RUN_DEPLOY_DEV', value: 'true'
-                                environment name: 'ROLLBACK', value: 'false'
+                                not{
+                                    environment name: 'ROLLBACK', value: 'true'
+                                }
+                                
                             }              
                             steps{
                                 echo "Creating pull request to ble"
