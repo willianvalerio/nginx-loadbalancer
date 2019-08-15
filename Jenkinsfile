@@ -124,7 +124,7 @@ pipeline {
                                     }
                                     echo "Current Build: ${currentBuild.result}"
                                     echo "Current stage: ${currentBuild.currentResult}"
-                                    if(currentBuild.result != 'SUCCESS' && currentBuild.result == null){
+                                    if(currentBuild.result == 'UNSTABLE'){
                                         echo "Tests failed! I will rollback"
                                         env["ROLLBACK"]=true
                                     }
