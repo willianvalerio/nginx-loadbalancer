@@ -43,7 +43,18 @@ pipeline {
                 stage('check-commit-message') {
                     steps {
                         script {
-                            echo "check"
+                            current_commit_message = sh(script: '''
+                                git rev-list --format=%B --max-count=1 HEAD |head -2 |tail -1
+                            ''', returnStdout: true).trim()
+
+                            if (current_commit_message == 'Prepare for next Release') {
+                                currentBuild.result = 'ABORTED'
+                                error('Parando build por ser um commit de CI.')
+                            }
+                            // If env is false, dont open PR, but continue he build
+                            if(env['RUN_CI'] == false){
+                                currentBuild.result = 'ABORTED'
+                            }
                         }
                     }
                 }
