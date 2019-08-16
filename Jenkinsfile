@@ -3,6 +3,11 @@
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 
+/*
+New Jenkinfile with CI
+Template: Node.js
+*/
+
 pipeline {
     agent any
     environment {
@@ -11,11 +16,12 @@ pipeline {
         RUN_PRE_BUILD = true
         RUN_POST_BUILD = true
         RUN_COMPILE = true
-        RUN_CI = true
+        RUN_CI = false /*If false, disable CI*/
         S3_BUCKET_ARTIFACT = "cdt-devops-tools-lambda-functions-artifacts"
         S3_BUCKET_TEMPLATE = "cdt-devops-tools-lambda-functions-template"
-        //path = "splt_init"
-        //newVersion = "${newVersion}"
+        PATH_DEPLOY = "p2pIssuerTransfer"
+        ARCHITETURE = "Serverless"
+        JOB_ID = "06ba7d2a-6ee8-4c6b-ae9f-4c1b7714c850" //JobId do rundeck
 
     }
     options {
@@ -37,14 +43,7 @@ pipeline {
                 stage('check-commit-message') {
                     steps {
                         script {
-                            env["RUN_DEPLOY_DEV"]=true
-                            current_commit_message = sh(script: '''
-                                git rev-list --format=%B --max-count=1 HEAD |head -2 |tail -1
-                            ''', returnStdout: true).trim()
-
-                            if (current_commit_message == 'Prepare for next Release') {
-                                currentBuild.result = 'ABORTED'
-                                error('Parando build por ser um commit de CI.')
+                            echo "check"
                             }
                         }
                     }
@@ -52,10 +51,42 @@ pipeline {
 
                 stage('check-commits-behind') {
                     steps {
-                        checkCommitBehind()
+                        echo "check"
                     }
                 }
 
+                stage('set-envs') {
+                    steps {
+                        script {
+
+
+                            if (BRANCH_NAME.equals("master")) {
+                                echo "***** PERFORMING STEPS ON MASTER *****"
+                                env['environment'] = "prd"
+                                env['RUN_DEPLOY_PRD'] = true
+                                update_version(true)
+                            } else if (BRANCH_NAME.startsWith("PR")) {
+                                echo "***** PERFORMING STEPS ON PR *****"
+                                env['environment'] = "hml"
+                                env['RUN_DEPLOY_HML'] = true
+                                version_code_tag()
+                                env['newVersion'] = env['bumpci_tag']
+                            } else if (BRANCH_NAME.startsWith("hotfix")) {
+                                echo "***** PERFORMING STEPS ON PR *****"
+                                env['RUN_HOTFIX'] = true
+                                update_version(false)
+                            }
+                            else {
+                                echo "***** PERFORMING STEPS ON ANY BRANCH *****"
+                                env['environment'] = "dev"
+                                env['RUN_DEPLOY_DEV'] = true
+                                update_version(false)
+                            }
+                        }
+
+                        echo "***** FINISHED PRE-BUILD STEP *****"
+                    }
+                } 
             }
 
         }
@@ -65,16 +96,17 @@ pipeline {
                 stage('notify') {
                     steps {
                         echo sh(returnStdout: true, script: 'env')
-                        //notifyBuild('STARTED')
+                        //notify_build('STARTED')
                     }
                 }
 
                 stage('compile') {
                     steps {
                         script{
-                            echo "build"
-                            //sh 'npm install --save'
+                            //sh 'npm install --save --quiet --silent --loglevel error'
+                            //sh 'npm install --quiet --no-progress --silent'
                             //sh 'zip -r p2pIssuerTransfer.zip .'
+                            echo "compile"
                         }
                     }
                 } 
@@ -103,15 +135,15 @@ pipeline {
             parallel{
                 stage("dev"){
                     stages{
-                        stage('deploy: dev') {
+                         stage('deploy: dev') {
                             when {
                                 environment name: 'RUN_DEPLOY_DEV', value: 'true'
                             }       
                             steps {
-                                echo "Iniciando deploy no ambiente de DEV"
+                                echo "deploy"
+                                //deploy('dev')
                             }
-                        }
-                            
+                        }/*end stage deploy: dev*/
                         stage('tests: dev'){
                             when {
                                 environment name: 'RUN_DEPLOY_DEV', value: 'true'
@@ -119,8 +151,8 @@ pipeline {
                             steps{
                                 script{
                                     catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
-                                        echo "Testes DEV"
-                                        sh "exit 0"
+                                        tests('hml')
+                                        sh "exit 0" //test purpose - remove whent tests is really running
                                     }
                                     if(currentBuild.result == 'UNSTABLE'){
                                         echo "Tests failed! I will rollback"
@@ -128,35 +160,41 @@ pipeline {
                                     }
                                 }
                             }
-                        }
+                        }/*end stage tests: dev*/
 
-                        stage('pull-request'){
+                         stage('pull-request'){
                             when {
                                 environment name: 'RUN_DEPLOY_DEV', value: 'true'
+                                environment name: 'RUN_CI', value: 'true'
                                 not{
-                                    environment name: 'ROLLBACK', value: 'true'
+                                    environment name: 'ROLLBACK', value: 'true'       
                                 }
-                                
+                                not{
+                                    environment name:  'RUN_HOTFIX', value: 'true'
+                                }
                             }              
                             steps{
                                 echo "Creating pull request to master"
-                                //createPullRequest('master')
+                                create_pull_request('master')
                             }
-                        }
-                    }                            
-                }
+                        } /*end stage pull-request*/
+                    }/*end stages*/
+                }/*end stage dev*/
+
                 stage("hml"){
+                    when{
+                        environment name: 'RUN_CI', value: 'true'
+                    }
                     stages{
                         stage('deploy: hml'){
                             when {
                                 environment name: 'RUN_DEPLOY_HML', value: 'true'
                             }            
                             steps{
-                                script{
-                                    echo "Deploy HML"
-                                }
+                                //deploy('hml')
+                                echo "deploy"
                             }
-                        }
+                        }/*end stage deploy-hml*/
 
                         stage('tests: hml'){
                             when {
@@ -164,95 +202,98 @@ pipeline {
                             }            
                             steps{
                                 script{
-                                    try{
-                                        echo "Testes HML"
-                                    }catch(Exception e){
-                                        env['ROLLBACK'] = true
+                                    catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
+                                        tests('hml')
+                                        sh "exit 0" //test purpose - remove whent tests is really running
+                                    }
+                                    if(currentBuild.result == 'UNSTABLE'){
+                                        echo "Tests failed! I will rollback"
+                                        env["ROLLBACK"]=true
                                     }
                                 }
                             }
-                        }
-                    }
-                    
-                }
+                        }/*end stage test-hml*/
+                    }/*end stages*/
+                }/*end stage html*/
                 stage("prd"){
+                    when{
+                        environment name: 'RUN_CI', value: 'true'
+                    }
                     stages{
                         stage('deploy: prd'){
                             when {
                                 environment name: 'RUN_DEPLOY_PRD', value: 'true'
                             }            
                             steps{
-                                script{
-                                    echo "Deploy PRD"
-                                }
+                                //deploy('prd')
+                                echo "deploy"
                             }
-                        }
+                        }/*end stage deploy-prd*/
 
                         stage('merge-back') {
                             when {
                                 environment name: 'RUN_DEPLOY_PRD', value: 'true'
                             }            
                             steps {
-                                script{
-                                    merge_back()
-                                }
+                                merge_back()
                             }
-                        }
+                        }/*end stage merge-back*/
 
                         stage('delete-branch'){
                             when {
                                 environment name: 'RUN_DEPLOY_PRD', value: 'true'
                             }            
                             steps{
-                                script{
-                                    echo "Delete Branch"
-                                }
+                                delete_branch()
+                            }
+                        }/*end stage delete-branch*/
+                    }/*end stages*/
+                }/*end stage prd*/
+                stage('hotfix'){
+                    stages{
+                        stage('pull-request'){
+                            when{
+                                environment name:  'RUN_HOTFIX', value: 'true'
+                            }
+                            steps{
+                                create_pull_request('master') 
                             }
                         }
-                    }
-                }
-                stage("hotfix"){
-                    steps{
-                        script{
-                            echo "Create PR"
-                        }
-                    }
-                }
-            }
-        }
+                    }/*end stage pull-request*/
+                }/*end stage hotfix*/
+            }/*end stage parallel*/
+        }/*end stage deployment*/
 
         stage('rollback'){
             when{
                  environment name: 'ROLLBACK', value: 'true'
             }
             steps{
-                script{
-                    echo "Efetuando rollback por falhas no teste"
-                    currentBuild.result = 'UNSTABLE'
-                    
-                }
+                rollback()
             }
-        }
-
-    }
+        }/*end stage rollback*/
+    }/*end stage rollback*/
     post {
         success {
-            //notifyBuild('SUCCESSFUL')
+            //notify_build('SUCCESSFUL')
             echo "success"
         }
         failure {
-            //notifyBuild('FAILED')
+            //notify_build('FAILED')
             echo "failure"
+            // TO-DO delete cloud formation from S3
         }
         always {
-            echo "always"
+            //send_logstash()
+            deleteDir() // Must delete after build, random errors occurs reusing workspace
         }
     }
-
 }
 
 
-def notifyBuild(String buildStatus = 'STARTED') {
+
+
+def notify_build(String buildStatus = 'STARTED') {
     // build status of null means successful
     buildStatus = buildStatus ?: 'SUCCESSFUL'
 
@@ -291,7 +332,7 @@ def notifyBuild(String buildStatus = 'STARTED') {
         fields.add(field);
 
         field.put('title', 'Path');
-        field.put('value', 'p2pIssuerTransfer');
+        field.put('value', ${PATH_DEPLOY});
         fields.add(field);
 
         attachment.put('fields',fields);
@@ -344,22 +385,19 @@ def notifyBuild(String buildStatus = 'STARTED') {
     //)
 }
 
-def createPullRequest(String branchBase) {
+def create_pull_request(String branchBase) {
     script{
-        //env['current_commit_message'] = sh(script: ''' 
-        //            git rev-list --format=%B --max-count=1 HEAD |head -2 |tail -1 
-        //''', returnStdout: true)
-        sh(script: '''
-                git clone git@github.com:cdt-baas/github-backup.git
-                getToken=`python3 github-backup/getGitToken.py`
-                echo ${current_commit_message}
-                current_commit_message=`git rev-list --format=%B --max-count=1 HEAD |head -2 |tail -1`
-                curl -d '{ "title": "Pull Request automate pipeline", "body": "'"${current_commit_message}"'", "head": "develop", "base": "master" }' -H "Content-Type: application/json" -X POST https://api.github.com/repos/cdt-baas/p2ptransfer-serverbased/pulls?access_token=${getToken}
-        ''', returnStdout: true)
+        echo "Creating Pull Request to ${branchBase}"
+        // sh(script: '''
+        //         git clone git@github.com:cdt-baas/github-backup.git
+        //         getToken=`python3 github-backup/getGitToken.py`
+        //         echo ${current_commit_message}
+        //         current_commit_message=`git rev-list --format=%B --max-count=1 HEAD |head -2 |tail -1`
+        //         curl -d '{ "title": "Pull Request automate pipeline", "body": "'"${current_commit_message}"'", "head": "develop", "base": "master" }' -H "Content-Type: application/json" -X POST https://api.github.com/repos/cdt-baas/p2ptransfer-serverbased/pulls?access_token=${getToken}
+        // ''', returnStdout: true)
 
         sh "git checkout ${BRANCH_NAME}"
-        //createPullRequest = "hub pull-request -m '${current_commit_message}' -b ${branchBase} -h '${BRANCH_NAME}'"
-        createPullRequest = "hub pull-request -m '${current_commit_message}' -b master -h '${BRANCH_NAME}'"
+        createPullRequest = "hub pull-request -m '${current_commit_message}' -b ${branchBase} -h '${BRANCH_NAME}'"
         echo "Running: ${createPullRequest}"
         pullRequestUrl = sh(returnStdout: true, script: createPullRequest).trim()
    }
@@ -382,7 +420,7 @@ def checkCommitBehind() {
     }
 }
 
-def updateVersion(boolean isMaster){
+def update_version(boolean isMaster){
     version_code_tag()
     def oldVersion = "${env.bumpci_tag}".tokenize('.')
     major = oldVersion[0].toInteger()
@@ -439,23 +477,91 @@ def merge_back() {
 //  }
 }
 
-def validStats() {
+def deploy(environment){
+    
+    script {
+        echo "Iniciando deploy no ambiente de ${environment}"
+        env['profile'] = environment
+        print_versions()
+        env['current_commit_message'] = current_commit_message
+        step([$class: "RundeckNotifier",
+            includeRundeckLogs: true,
+            jobId: "${JOB_ID}",
+            nodeFilters: "",
+            options: """
+                        Arquitetura=${ARCHITETURE}
+                        template=${fileOutput}
+                        version=${newVersion}
+                        path=${PATH_DEPLOY}
+                    """,
+            rundeckInstance: "rundeck.devtools.caradhras.io",
+            shouldFailTheBuild: true,
+            shouldWaitForRundeckJob: true,
+            tags: "",
+            tailLog: true])
+    }
+    valid_stats()
+}
+
+def tests(environment){
+    script{
+        echo "Running tests on: ${environment}"
+    }
+}
+
+def delete_branch(){
+    script(){
+        echo "Deleting Branch"
+    }
+}
+
+def valid_stats() {
     script {
         def stats = sh(script: '''
                         aws cloudformation describe-stacks --stack-name p2pIssuerTransfer --profile ${profile} | jq '.Stacks[0].StackStatus' | sed -e 's/\"//g'
                              ''', returnStdout: true).trim()
-        if ( stats == 'UPDATE_COMPLETE') {
+        if ( stats == 'UPDATE_COMPLETE' || stats == 'CREATE_COMPLETE' || stats == 'OK') {
              echo "Success"
-        }
-        else if (stats == 'CREATE_COMPLETE') {
-             echo "Success"
-        }
-        else if (stats == 'OK') {
-            echo "Success"
         }
         else {
             currentBuild.result = 'FAILURE'       
             error("Problema ao realizar o deploy")
         }
     }
+}
+
+def print_versions(){
+    script{
+        def oldVersion = sh(script: '''
+                            aws cloudformation describe-stacks --stack-name p2pIssuerTransfer --profile ${profile} --output text | grep Versao | cut -f3
+                        ''',returnStdout: true).trim()
+
+        //To ELK and Rollback
+        echo "OLD_VERSION=${oldVersion}"
+        echo "NEW_VERSION=${newVersion}"
+    }
+}
+
+def rollback(){
+    script{
+        echo "Efetuando rollback por falhas no teste"
+        currentBuild.result = 'UNSTABLE'
+                    
+    }
+}
+
+def checkPullRequest() {
+    //echo 'Manual Promotion'
+    // we need a first milestone step so that all jobs entering this stage are tracked an can be aborted if needed
+    milestone 1
+    // time out manual approval after ten minutes
+    timeout(time: 10, unit: 'MINUTES') {
+        input message: "Are you sure?"
+    }
+    // this will kill any job which is still in the input step
+    milestone 2
+}
+
+def send_logstash(){
+    logstashSend failBuild: true, maxLines: 1000
 }
