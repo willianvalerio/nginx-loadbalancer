@@ -43,12 +43,7 @@ pipeline {
                 stage('check-commit-message') {
                     steps {
                         script {
-                            current_commit_message = "automate"
-
-                            // If env is false, dont open PR, but continue he build
-                            if(env['RUN_CI']){
-                                currentBuild.result = 'ABORTED'
-                            }
+                            current_commit_message = "hein"
                         }
                     }
                 }
@@ -467,6 +462,7 @@ def version_code_tag() {
 
 
 def merge_back() {
+    echo "doing merge-back"
 //  withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'rundeck-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 //    script {
 //      sh 'curl -s -c rundeck.cookie "http://devops-rundeck.smiles.local.br/j_security_check?j_username=${USERNAME}&j_password=${PASSWORD}"'
