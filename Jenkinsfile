@@ -63,23 +63,23 @@ pipeline {
                                 echo "***** PERFORMING STEPS ON MASTER *****"
                                 env['environment'] = "prd"
                                 env['RUN_DEPLOY_PRD'] = true
-                                update_version(true)
+                                //update_version(true)
                             } else if (BRANCH_NAME.startsWith("PR")) {
                                 echo "***** PERFORMING STEPS ON PR *****"
                                 env['environment'] = "hml"
                                 env['RUN_DEPLOY_HML'] = true
-                                version_code_tag()
-                                env['newVersion'] = env['bumpci_tag']
+                                //version_code_tag()
+                                //env['newVersion'] = env['bumpci_tag']
                             } else if (BRANCH_NAME.startsWith("hotfix")) {
                                 echo "***** PERFORMING STEPS ON PR *****"
                                 env['RUN_HOTFIX'] = true
-                                update_version(false)
+                                //update_version(false)
                             }
                             else {
                                 echo "***** PERFORMING STEPS ON ANY BRANCH *****"
                                 env['environment'] = "dev"
                                 env['RUN_DEPLOY_DEV'] = true
-                                update_version(false)
+                                //update_version(false)
                             }
                         }
 
