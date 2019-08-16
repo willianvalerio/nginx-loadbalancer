@@ -44,7 +44,6 @@ pipeline {
                     steps {
                         script {
                             echo "check"
-                            }
                         }
                     }
                 }
