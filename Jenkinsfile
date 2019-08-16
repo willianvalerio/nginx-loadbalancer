@@ -43,12 +43,7 @@ pipeline {
                 stage('check-commit-message') {
                     steps {
                         script {
-                            current_commit_message = "automate"
-
-                            // If env is false, dont open PR, but continue he build
-                            if(env['RUN_CI']){
-                                currentBuild.result = 'ABORTED'
-                            }
+                            current_commit_message = "hein"
                         }
                     }
                 }
@@ -400,10 +395,10 @@ def create_pull_request(String branchBase) {
         //         curl -d '{ "title": "Pull Request automate pipeline", "body": "'"${current_commit_message}"'", "head": "develop", "base": "master" }' -H "Content-Type: application/json" -X POST https://api.github.com/repos/cdt-baas/p2ptransfer-serverbased/pulls?access_token=${getToken}
         // ''', returnStdout: true)
 
-        sh "git checkout ${BRANCH_NAME}"
-        createPullRequest = "hub pull-request -m '${current_commit_message}' -b ${branchBase} -h '${BRANCH_NAME}'"
-        echo "Running: ${createPullRequest}"
-        pullRequestUrl = sh(returnStdout: true, script: createPullRequest).trim()
+        // sh "git checkout ${BRANCH_NAME}"
+        // createPullRequest = "hub pull-request -m '${current_commit_message}' -b ${branchBase} -h '${BRANCH_NAME}'"
+        // echo "Running: ${createPullRequest}"
+        // pullRequestUrl = sh(returnStdout: true, script: createPullRequest).trim()
    }
 }
 
@@ -467,6 +462,7 @@ def version_code_tag() {
 
 
 def merge_back() {
+    echo "doing merge-back"
 //  withCredentials([[$class: 'UsernamePasswordMultiBinding', credentialsId: 'rundeck-credentials', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD']]) {
 //    script {
 //      sh 'curl -s -c rundeck.cookie "http://devops-rundeck.smiles.local.br/j_security_check?j_username=${USERNAME}&j_password=${PASSWORD}"'
