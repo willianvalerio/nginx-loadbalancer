@@ -16,7 +16,7 @@ pipeline {
         RUN_PRE_BUILD = true
         RUN_POST_BUILD = true
         RUN_COMPILE = true
-        RUN_CI = false /*If false, disable CI*/
+        RUN_CI = true /*If false, disable CI*/
         S3_BUCKET_ARTIFACT = "cdt-devops-tools-lambda-functions-artifacts"
         S3_BUCKET_TEMPLATE = "cdt-devops-tools-lambda-functions-template"
         PATH_DEPLOY = "p2pIssuerTransfer"
