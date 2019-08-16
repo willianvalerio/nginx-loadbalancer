@@ -43,9 +43,7 @@ pipeline {
                 stage('check-commit-message') {
                     steps {
                         script {
-                            current_commit_message = sh(script: '''
-                                git rev-list --format=%B --max-count=1 HEAD |head -2 |tail -1
-                            ''', returnStdout: true).trim()
+                            current_commit_message = "automate"
 
                             if (current_commit_message == 'Prepare for next Release') {
                                 currentBuild.result = 'ABORTED'
