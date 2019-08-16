@@ -45,10 +45,6 @@ pipeline {
                         script {
                             current_commit_message = "automate"
 
-                            if (current_commit_message == 'Prepare for next Release') {
-                                currentBuild.result = 'ABORTED'
-                                error('Parando build por ser um commit de CI.')
-                            }
                             // If env is false, dont open PR, but continue he build
                             if(env['RUN_CI'] == false){
                                 currentBuild.result = 'ABORTED'
