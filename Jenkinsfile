@@ -46,7 +46,7 @@ pipeline {
                             current_commit_message = "automate"
 
                             // If env is false, dont open PR, but continue he build
-                            if(env['RUN_CI'] == false){
+                            if(env['RUN_CI']){
                                 currentBuild.result = 'ABORTED'
                             }
                         }
