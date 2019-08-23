@@ -111,7 +111,7 @@ pipeline {
                                 status = sh(script: "exit 1",  returnStatus:true)
                                 if(status != 0){
                                     //notify_build('INFRA-FAILED')
-                                    sh "exit 1"
+                                    sh "exit ${status}"
                                 }
                             }
                         }
