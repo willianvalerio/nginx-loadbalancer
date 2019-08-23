@@ -106,7 +106,7 @@ pipeline {
                     steps{
                         script{
                             def status = 0
-                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){ 
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){ 
                                 //status = sh(script: "/usr/local/bin/cfn_nag_scan --input-path cloudformation/template/cloudformation.yml",  returnStatus:true)
                                 status = sh(script: "command not exist",  returnStatus:true)
                                 if(status != 0){
