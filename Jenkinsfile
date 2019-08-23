@@ -90,6 +90,39 @@ pipeline {
 
         }
 
+        stage('test-infra'){
+            parallel{
+                stage('cfn-lint'){
+                    steps{
+                        script{
+                            catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE'){
+                                echo "Not implemented"
+                            }
+                        }
+                    }
+                    
+                }
+                stage('cfn-security'){
+                    steps{
+                        script{
+                            def status = 0
+                            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){ 
+                                //status = sh(script: "/usr/local/bin/cfn_nag_scan --input-path cloudformation/template/cloudformation.yml",  returnStatus:true)
+                                status = sh(script: "exit 1",  returnStatus:true)
+                                //if(status != 0){
+                                    //notify_build('INFRA-FAILED')
+                                //    sh "exit 1"
+                                //}
+                            }
+                            if(status != 0){
+                                echo "Falhou mas seguiu"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         stage('build'){
             parallel{
                 stage('notify') {
