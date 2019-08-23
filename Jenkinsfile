@@ -108,7 +108,7 @@ pipeline {
                             def status = 0
                             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE'){ 
                                 //status = sh(script: "/usr/local/bin/cfn_nag_scan --input-path cloudformation/template/cloudformation.yml",  returnStatus:true)
-                                status = sh(script: "exit 1",  returnStatus:true)
+                                status = sh(script: "command not exist",  returnStatus:true)
                                 if(status != 0){
                                     //notify_build('INFRA-FAILED')
                                     sh "exit ${status}"
